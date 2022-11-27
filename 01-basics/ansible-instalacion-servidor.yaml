@@ -1,0 +1,138 @@
+---
+  - name: Instalación entorno general
+    hosts: all
+    become: yes
+    become_user: root
+
+    vars_files:
+      - ansible_vars/vars.yaml
+
+    tasks:
+      - name: Actualizar paquetes
+        apt:
+           update_cache: true
+           cache_valid_time: 3600
+           force_apt_get: true
+
+      - name: Instalación de paquetes básicos
+        apt:
+          name: "{{ packages }}"
+        vars:
+          packages:
+            - tmux
+            - htop
+            - iotop
+            - curl
+            - nmap
+            - tcpdump
+            - unattended-upgrades
+            - ncdu
+            - rsync
+            - iptables
+            - nano
+
+      - name: unattended-upgrades
+        lineinfile:
+          path: /etc/apt/apt.conf.d/20auto-upgrades
+          regexp: '{{item.From}}'
+          line: '{{item.To}}'
+          state: present
+          create: yes
+        with_items:
+          - { From: '^APT::Periodic::Update-Package-Lists', To: 'APT::Periodic::Update-Package-Lists "1";' }
+          - { From: '^APT::Periodic::Unattended-Upgrade', To: 'APT::Periodic::Unattended-Upgrade "1";' }
+
+      - name: Firewall - Permitir tráfico loopback
+        iptables:
+          action: append
+          chain: INPUT
+          in_interface: lo
+          jump: ACCEPT
+
+      - name: Firewall - Permitir conexiones "related" y "established"
+        iptables:
+          chain: INPUT
+          ctstate: ESTABLISHED,RELATED
+          jump: ACCEPT
+
+      - name: Firewall - Puertos sobre los que establecer una nueva conexión.
+        iptables:
+          chain: INPUT
+          protocol: tcp
+          destination_port: "{{ item }}"
+          ctstate: NEW
+          syn: match
+          jump: ACCEPT
+        loop:
+          - "22"
+          - "80"
+          - "443"
+
+      - name: Firewall - Política general para "INPUT" a "DROP"
+        iptables:
+          chain: INPUT
+          policy: DROP
+
+      - name: Firewall - Política general para "FORWARD" a "DROP"
+        iptables:
+          chain: FORWARD
+          policy: DROP
+
+      - name: fail2ban, para evitar ataques
+        apt:
+          name: "{{ packages }}"
+        vars:
+          packages:
+            - fail2ban
+
+      - name: Mensaje de bienvenida /etc/motd
+        copy:
+          dest: "/etc/motd"
+          content: |
+            _._     _,-'""`-._
+            (,-.`._,'(       |\`-/|
+                `-.-' \ )-`( , o o)
+                      `-    \`_`"'- Bienvenid@ a vzenix.
+
+      - name: Instalando docker y herramientas vinculadas a este
+        apt:
+          name: "{{ packages }}"
+        vars:
+          packages:
+            - apt-transport-https
+            - software-properties-common
+            - ca-certificates
+            - gnupg
+            - lsb-release
+            - docker.io
+            - python3-docker
+            - python3-pip
+
+      - name: Instalar librerías de python que usa docker-compose
+        pip:
+          name: docker-compose
+
+      - name: Forzamos versión de docker-compose, pip de python instala una versión antigua
+        get_url:
+          url : "https://github.com/docker/compose/releases/download/v{{ docker_compose_version }}/docker-compose-linux-x86_64"
+          dest: /usr/local/bin/docker-compose
+          mode: "a+x"
+          force: yes
+
+      - name: Creamos el Directorio para stack con proxy inverso (Traefik - https://doc.traefik.io/)
+        file:
+          path: /docker_stacks/basicos/
+          state: directory
+
+      - name: Copiar stacks del proxy inverso (Traefik - https://doc.traefik.io/)
+        synchronize:
+          src: "docker_stacks_{{ env }}/traefik"
+          dest: "/docker_stacks/basicos/"
+          owner: no
+          group: no
+          rsync_opts:
+            - "--exclude=.git"
+
+      - name: Lanzamos docker-compose.yml del proxy inverso (Traefik - https://doc.traefik.io/)
+        docker_compose:
+          project_src: /docker_stacks/basicos/traefik/
