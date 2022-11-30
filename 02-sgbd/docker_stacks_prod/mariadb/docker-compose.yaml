@@ -1,0 +1,37 @@
+services:
+
+  sgbd_mariadb:
+    image: mariadb:10.10
+    container_name: sgbd_mariadb
+    restart: always
+    environment:
+      - MARIADB_ROOT_PASSWORD_FILE=/run/secrets/mariadb_root_password
+    secrets:
+      - mariadb_root_password
+    ports:
+      - 3306:3306
+    networks:
+      - sgbd_mariadb
+    volumes:
+      - /data/sgbd/mariadb:/var/lib/mysql
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+
+  sgbd_adminer:
+    image: adminer:latest
+    container_name: sgbd_adminer
+    restart: always
+    networks:
+      - sgbd_mariadb
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sgbd_adminer.rule=Host(`adminer.vzenix.es`)"
+
+secrets:
+  mariadb_root_password:
+    file: /docker_secrets/mariadb_root_password
+
+networks:
+  sgbd_mariadb:
+    name: sgbd_mariadb
+    external: true

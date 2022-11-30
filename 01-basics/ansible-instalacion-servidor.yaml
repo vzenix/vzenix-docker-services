@@ -136,3 +136,5 @@
       - name: Lanzamos docker-compose.yml del proxy inverso (Traefik - https://doc.traefik.io/)
         docker_compose:
           project_src: /docker_stacks/basicos/traefik/
+          recreate: "always"
+          # state: "absent"

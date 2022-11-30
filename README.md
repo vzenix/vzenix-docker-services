@@ -34,6 +34,15 @@ ansible all --ask-pass -m ping --limit=</ansiblle/hosts#nombre_host>
 ansible-playbook ansible-instalacion-servidor.yaml --limit=</ansiblle/hosts#nombre_host> --ask-pass
 ```
 
+## 02-sgbd
+
+Install of SGBD used
+
+```
+# Sample for launch playbook
+ansible-playbook ansible-instalacion-sgbd.yaml --limit=</ansiblle/hosts#nombre_host> --ask-pass --ask-vault-pass
+```
+
 # Licence
 
 * [Attribution 4.0 International (CC BY 4.0)](https://github.com/vzenix/vzenix-docker-services/blob/main/LICENCE.md)
