@@ -36,6 +36,8 @@ ansible-playbook ansible-instalacion-servidor.yaml --limit=</ansiblle/hosts#nomb
 
 Instalación de los SGBD usados
 
+El puerto 3306 se securiza en el cortafuegos, modificar docker-compose.yaml de traefik para no exponer esto en caso de ser un servidor compeltamente público
+
 ```
 # Ejemplo de comando para lanzar el playbook
 ansible-playbook ansible-instalacion-sgbd.yaml --limit=</ansiblle/hosts#nombre_host> --ask-pass --ask-vault-pass

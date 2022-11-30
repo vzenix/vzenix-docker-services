@@ -38,6 +38,8 @@ ansible-playbook ansible-instalacion-servidor.yaml --limit=</ansiblle/hosts#nomb
 
 Install of SGBD used
 
+Port 3306 exposed is secured by firewall, you need modify docker-compose.yaml of traefik for remove the expose 3306 port if you don't have a firewall and the machine is full exposed
+
 ```
 # Sample for launch playbook
 ansible-playbook ansible-instalacion-sgbd.yaml --limit=</ansiblle/hosts#nombre_host> --ask-pass --ask-vault-pass
