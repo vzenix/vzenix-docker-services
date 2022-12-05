@@ -5,7 +5,7 @@ Enviroment for custom services build into containers docker
 # Translations
 
 * [English](https://github.com/vzenix/vzenix-docker-services/blob/main/README.md)
-* [Español](https://github.com/vzenix/vzenix-docker-services/blob/main/READNE_ES.md)
+* [Español](https://github.com/vzenix/vzenix-docker-services/blob/main/README_ES.md)
 
 # Description
 
@@ -18,7 +18,7 @@ This repository use the next tecnologies for maintenance of services:
 
 ## ansible_vars
 
-Varse used in the ansible playbooks
+Vars used in the ansible playbooks
 
 ## docs
 

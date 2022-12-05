@@ -26,6 +26,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sgbd_adminer.rule=Host(`adminer.vzenix.es`)"
+      - "traefik.http.routers.sgbd_adminer.entrypoints=websecure"
+      - "traefik.http.routers.sgbd_adminer.tls=true"
 
 secrets:
   mariadb_root_password:

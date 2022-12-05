@@ -18,6 +18,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.www_vzenix_es.rule=Host(`vzenix.es`)"
       - "traefik.http.routers.www_vzenix_es.rule=Host(`www.vzenix.es`)"
+      - "traefik.http.routers.www_vzenix_es.entrypoints=websecure"
+      - "traefik.http.routers.www_vzenix_es.tls=true"
 
 networks:
   sgbd_mariadb:
