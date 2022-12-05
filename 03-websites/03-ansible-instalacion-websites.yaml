@@ -1,0 +1,51 @@
+---
+  - name: Instalación de los portales webs generales
+    hosts: all
+    become: yes
+    become_user: root
+
+    vars_files:
+      - ../ansible_vars/vars.yaml
+
+    tasks:
+      - name: Copiar stacks con los portales al servidor
+        synchronize:
+          src: "docker_stacks_{{ env }}/websites"
+          dest: "/docker_stacks/www/"
+          owner: no
+          group: no
+          rsync_opts:
+            - "--exclude=.git"
+
+      - name: Creamos directorios para virtual host si no existe (https://vzenix.es)
+        file:
+          path: "/docker_data/apache/www_vzenix_es/conf"
+          state: directory
+
+      - name: Creamos directorio para el Document Root si no existe (https://vzenix.es)
+        file:
+          path: "/docker_data/www/www_vzenix_es"
+          state: directory
+
+      - name: Eliminamos código previo (https://vzenix.es)
+        command: /bin/rm -fR /docker_data/www/www_vzenix_es/* /docker_data/www/www_vzenix_es/.*
+
+      - name: Compiamos los vhost de apache (https://vzenix.es)
+        copy:
+          src: "./config/apache_vhost_php_symfony.conf"
+          dest: "/docker_data/apache/www_vzenix_es/conf/vzenix_es_vhost.conf"
+
+      - name: Descargamos código para del portal (https://vzenix.es)
+        git:
+          repo: https://github.com/vzenix/vzenix-es.git
+          dest: /docker_data/www/www_vzenix_es/
+          clone: yes
+          update: yes
+
+      - name: Lanzamos docker-compose.yml con los portales
+        docker_compose:
+          project_src: /docker_stacks/www/websites/
+          recreate: "always"
+
+      - name: Instalamos portal web (https://vzenix.es)
+        command: docker exec -it -w $PWD www_vzenix_es php /var/www/html/composer.phar install --working-dir "/var/www/html"

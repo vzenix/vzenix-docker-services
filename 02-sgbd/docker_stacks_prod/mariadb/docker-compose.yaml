@@ -13,7 +13,7 @@ services:
     networks:
       - sgbd_mariadb
     volumes:
-      - /data/sgbd/mariadb:/var/lib/mysql
+      - /docker_data/sgbd/mariadb:/var/lib/mysql
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
 

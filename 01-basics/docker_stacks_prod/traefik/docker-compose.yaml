@@ -17,6 +17,7 @@ services:
     networks:
       - proxy
       - sgbd_mariadb
+      - www_websites
     ports:
       # The HTTP port
       - "80:80"
@@ -41,3 +42,5 @@ networks:
     name: proxy
   sgbd_mariadb:
     name: sgbd_mariadb
+  www_websites:
+    name: www_websites

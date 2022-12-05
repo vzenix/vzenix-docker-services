@@ -1,6 +1,0 @@
----
-# Docker Compose a instalar
-docker_compose_version: "2.13.0"
-# Entorno
-env: "prod"
-

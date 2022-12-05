@@ -1,0 +1,31 @@
+---
+  - name: Página web para pruebas de conexión (https://ping.vzenix.es)
+    hosts: all
+    become: yes
+    become_user: root
+
+    vars_files:
+      - ../ansible_vars/vars.yaml
+
+    tasks:
+      - name: Copiar stacks al servidor (https://ping.vzenix.es)
+        synchronize:
+          src: "docker_stacks_{{ env }}/ping"
+          dest: "/docker_stacks/www/"
+          owner: no
+          group: no
+          rsync_opts:
+            - "--exclude=.git"
+
+      - name: Crear index.html (https://ping.vzenix.es)
+        copy:
+          dest: "/docker_data/www/ping_vzenix_es/index.html"
+          content: |
+            <p>
+              P&aacute;gina de ejemplo para pruebas
+            </p>
+
+      - name: Lanzamos docker-compose.yml (https://ping.vzenix.es)
+        docker_compose:
+          project_src: /docker_stacks/www/ping/
+          recreate: "always"

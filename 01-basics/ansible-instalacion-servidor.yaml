@@ -5,7 +5,7 @@
     become_user: root
 
     vars_files:
-      - ansible_vars/vars.yaml
+      - ../ansible_vars/vars.yaml
 
     tasks:
       - name: Actualizar paquetes
@@ -30,6 +30,7 @@
             - rsync
             - iptables
             - nano
+            - git
 
       - name: unattended-upgrades
         lineinfile:
@@ -89,10 +90,12 @@
         copy:
           dest: "/etc/motd"
           content: |
+            
             _._     _,-'""`-._
             (,-.`._,'(       |\`-/|
                 `-.-' \ )-`( , o o)
                       `-    \`_`"'- Bienvenid@ a vzenix.
+            
 
       - name: Instalando docker y herramientas vinculadas a este
         apt:

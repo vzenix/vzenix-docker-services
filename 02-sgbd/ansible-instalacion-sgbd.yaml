@@ -5,8 +5,8 @@
     become_user: root
 
     vars_files:
-      - ansible_vars/vars.yaml
-      - ansible_vars/vault.yaml
+      - ../ansible_vars/vars.yaml
+      - ../ansible_vars/vault.yaml
 
     tasks:
       - name: Actualizar paquetes

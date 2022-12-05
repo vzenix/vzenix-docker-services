@@ -1,0 +1,21 @@
+services:
+
+  ping_vzenix_es:
+    image: php:8.1.13-apache
+    container_name: ping_vzenix_es
+    restart: always
+    networks:
+      - www_websites
+    volumes:
+      - /docker_data/www/ping_vzenix_es:/var/www/html  # Ficheros back de la aplicacion
+      - /docker_data/apache/ping_vzenix_es/conf:/etc/apache2/sites-enabled   # Ficheros de configuracion del apache
+      - /docker_data/logs/ping_vzenix_es/apache2:/var/log/apache2     # Ficheros de log
+      - /etc/localtime:/etc/localtime:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ping_vzenix_es.rule=Host(`ping.vzenix.es`)"
+
+networks:
+  www_websites:
+    name: www_websites
+    external: true

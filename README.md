@@ -14,7 +14,11 @@ This repository use the next tecnologies for maintenance of services:
 * Ansible / Ansible Playbooks: Automatize install and maintenance of machines.
 * Docker / Docker Compose: System for expose the services.
 
-# Contenido del repositorio
+# Content of this repository
+
+## ansible_vars
+
+Varse used in the ansible playbooks
 
 ## docs
 
@@ -36,13 +40,48 @@ ansible-playbook ansible-instalacion-servidor.yaml --limit=</ansiblle/hosts#nomb
 
 ## 02-sgbd
 
-Install of SGBD used
+Install SGBD used
 
 Port 3306 exposed is secured by firewall, you need modify docker-compose.yaml of traefik for remove the expose 3306 port if you don't have a firewall and the machine is full exposed
 
 ```
 # Sample for launch playbook
 ansible-playbook ansible-instalacion-sgbd.yaml --limit=</ansiblle/hosts#nombre_host> --ask-pass --ask-vault-pass
+```
+
+## 03-websites
+
+Install all public websites, require "ansible-instalacion-servidor.yaml" playbook
+
+### 01-ansible-instalacion-www-base.yaml
+
+Prepare system and create images of docker for host the websites
+
+```
+# Sample for launch playbook
+ansible-playbook 03-websites/01-ansible-instalacion-www-base.yaml --limit=</ansiblle/hosts#nombre_host> --ask-pass
+```
+
+### 02-ansible-instalacion-www-ping.yaml
+
+Publish a basic website ping.vzenix.es for test
+
+Require previous playbooks
+
+```
+# Sample for launch playbook
+ansible-playbook 03-websites/02-ansible-instalacion-www-ping.yaml --limit=</ansiblle/hosts#nombre_host> --ask-pass
+```
+
+### 03-ansible-instalacion-websites.yaml
+
+Install or update websites services
+
+Require previous playbooks
+
+```
+# Sample for launch playbook
+ansible-playbook 03-websites/03-ansible-instalacion-websites.yaml --limit=</ansiblle/hosts#nombre_host> --ask-pass
 ```
 
 # Licence

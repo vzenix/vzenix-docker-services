@@ -1,0 +1,39 @@
+---
+  - name: Inicialización para la instalación de portales en el servidor
+    hosts: all
+    become: yes
+    become_user: root
+
+    vars_files:
+      - ../ansible_vars/vars.yaml
+
+    tasks:
+      - name: Actualizar paquetes
+        apt:
+           update_cache: true
+           cache_valid_time: 3600
+           force_apt_get: true
+
+      - name: Creamos el Directorio para descargar binario Dockerfile para portales
+        file:
+          path: /tmp/www_portales_php_dockerfiles/
+          state: directory
+
+      - name: Descargando Dockerfile para crear la imagen de los portales
+        ansible.builtin.get_url:
+          url: https://raw.githubusercontent.com/vzenix/vzenix-es/master/Dockerfile
+          dest: /tmp/www_portales_php_dockerfiles/Dockerfile
+          mode: '0755'
+
+      - name: Construir imagen para portales php
+        command: docker build -t "www_portales_php" /tmp/www_portales_php_dockerfiles
+
+      - name: Eliminamos Dockerfile al no ser ya necesario
+        file:
+          path: "/tmp/www_portales_php_dockerfiles"
+          state: absent
+
+      - name: Creamos el Directorio para los stacks de docker
+        file:
+          path: /docker_stacks/www/
+          state: directory

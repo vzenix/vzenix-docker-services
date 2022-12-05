@@ -1,0 +1,28 @@
+services:
+
+  www_vzenix_es:
+    image: www_portales_php
+    container_name: www_vzenix_es
+    restart: always
+    networks:
+      - www_websites
+      - sgbd_mariadb
+    environment:
+      - APP_ENV=prod
+    volumes:
+      - /docker_data/www/www_vzenix_es:/var/www/html  # Ficheros back de la aplicacion
+      - /docker_data/apache/www_vzenix_es/conf:/etc/apache2/sites-enabled   # Ficheros de configuracion del apache
+      - /docker_data/logs/www_vzenix_es/apache2:/var/log/apache2     # Ficheros de log
+      - /etc/localtime:/etc/localtime:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.www_vzenix_es.rule=Host(`vzenix.es`)"
+      - "traefik.http.routers.www_vzenix_es.rule=Host(`www.vzenix.es`)"
+
+networks:
+  sgbd_mariadb:
+    name: sgbd_mariadb
+    external: true
+  www_websites:
+    name: www_websites
+    external: true
