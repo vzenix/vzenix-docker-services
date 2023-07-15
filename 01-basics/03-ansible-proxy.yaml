@@ -1,0 +1,63 @@
+---
+  - name: Instalación del proxy
+    hosts: all
+    become: yes
+    become_user: root
+
+    vars_files:
+      - ../ansible_vars/vars.yaml
+
+    tasks:
+      # - name: docker-compose python package
+      #   ansible.builtin.pip:
+      #     name: docker-compose
+
+      - name: Creamos directorios para las configuraciones y almacen del proxy (/docker_data/)
+        file:
+          path: /docker_data/
+          state: directory
+
+      - name: Creamos directorios para las configuraciones y almacen del proxy (/docker_data/traefik/)
+        file:
+          path: /docker_data/traefik/
+          state: directory
+
+      - name: Creamos directorios para las configuraciones y almacen del proxy (/docker_data/traefik/letsencrypt/)
+        file:
+          path: /docker_data/traefik/letsencrypt/
+          state: directory
+
+      - name: Creamos secretos para la renovacion de certificados (ovh_endpoint)
+        copy:
+          dest: "/docker_secrets/ovh_endpoint"
+          content: "{{ ovh_endpoint }}"
+
+      - name: Creamos secretos para la renovacion de certificados (ovh_application_key)
+        copy:
+          dest: "/docker_secrets/ovh_application_key"
+          content: "{{ ovh_application_key }}"
+
+      - name: Creamos secretos para la renovacion de certificados (ovh_application_secret)
+        copy:
+          dest: "/docker_secrets/ovh_application_secret"
+          content: "{{ ovh_application_secret }}"
+
+      - name: Creamos secretos para la renovacion de certificados (ovh_consumer_key)
+        copy:
+          dest: "/docker_secrets/ovh_consumer_key"
+          content: "{{ ovh_consumer_key }}"
+
+      - name: Copiar stacks del proxy inverso (Traefik - https://doc.traefik.io/)
+        synchronize:
+          src: "docker_stacks_{{ env }}/traefik"
+          dest: "/docker_stacks/basicos/"
+          owner: no
+          group: no
+          rsync_opts:
+            - "--exclude=.git"
+
+      # - name: Lanzamos docker-compose.yml del proxy inverso (Traefik - https://doc.traefik.io/)
+      #   docker_compose:
+      #     project_src: /docker_stacks/basicos/traefik/
+      #     recreate: "always"
+      #     # state: "absent"

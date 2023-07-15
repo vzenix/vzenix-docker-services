@@ -1,0 +1,22 @@
+---
+  - name: Creación de redes docker
+    hosts: all
+    become: yes
+    become_user: root
+
+    vars_files:
+      - ../ansible_vars/vars.yaml
+
+    tasks:
+      - name: Crearmos red "proxy"
+        community.docker.docker_network:
+          name: proxy
+
+      - name: Crearmos red "sgbd_mariadb"
+        community.docker.docker_network:
+          name: sgbd_mariadb
+
+      - name: Crearmos red "www_websites"
+        community.docker.docker_network:
+          name: www_websites
+

@@ -14,8 +14,12 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.ping_vzenix_es.rule=Host(`ping.vzenix.es`)"
-      - "traefik.http.routers.ping_vzenix_es.entrypoints=websecure"
+      - "traefik.http.routers.ping_vzenix_es.entrypoints=web,websecure"
       - "traefik.http.routers.ping_vzenix_es.tls=true"
+      - "traefik.http.routers.ping_vzenix_es.tls.certresolver=myresolver"
+      # Redireccion http -> https
+      - "traefik.http.middlewares.ping_vzenix_es.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.ping_vzenix_es.redirectscheme.permanent=true"
 
 networks:
   www_websites:

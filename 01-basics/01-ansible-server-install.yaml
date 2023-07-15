@@ -1,5 +1,5 @@
 ---
-  - name: Instalación entorno general
+  - name: Instalación del sistema
     hosts: all
     become: yes
     become_user: root
@@ -8,6 +8,7 @@
       - ../ansible_vars/vars.yaml
 
     tasks:
+
       - name: Actualizar paquetes
         apt:
            update_cache: true
@@ -95,49 +96,62 @@
             (,-.`._,'(       |\`-/|
                 `-.-' \ )-`( , o o)
                       `-    \`_`"'- Bienvenid@ a vzenix.
-            
 
       - name: Instalando docker y herramientas vinculadas a este
         apt:
-          name: "{{ packages }}"
-        vars:
-          packages:
-            - apt-transport-https
-            - software-properties-common
-            - ca-certificates
-            - gnupg
-            - lsb-release
-            - docker.io
-            - python3-docker
-            - python3-pip
+          name: 
+              - apt-transport-https
+              - ca-certificates
+              - curl
+              - gnupg2
+              - software-properties-common
+          state: present
+          update_cache: no
 
-      - name: Instalar librerías de python que usa docker-compose
-        pip:
-          name: docker-compose
+      - name: Docker GPG apt Key
+        apt_key:
+          url: "{{ docker_apt_gpg_key }}"
+          state: present
 
-      - name: Forzamos versión de docker-compose, pip de python instala una versión antigua
+      - name: Docker Repository (repositorio donde buscar los paquetes)
+        apt_repository:
+          repo: "{{ docker_apt_repository }}"
+          state: present
+          update_cache: true
+
+      - name: Volvemos a actualizar paquetes
+        apt:
+           update_cache: true
+           cache_valid_time: 3600
+           force_apt_get: true
+
+      - name: Actualizar e instalar docker-ce
+        apt:
+          name: docker-ce
+          state: present
+          update_cache: false
+
+      - name: Lanzando y habilitando docker-ce
+        service:
+          name: docker
+          state: started
+          enabled: true
+
+      ##########################################################################################################
+      #### Este bloque es solo para establecer forzar una versión diferente a la que hay en los repositorios
+      ##########################################################################################################
+      #
+      - name: Forzamos versión de docker-compose
         get_url:
           url : "https://github.com/docker/compose/releases/download/v{{ docker_compose_version }}/docker-compose-linux-x86_64"
           dest: /usr/local/bin/docker-compose
           mode: "a+x"
           force: yes
+        when: >
+          docker_compose_current_version is not defined
+          or docker_compose_current_version is version(docker_compose_version, '<')
 
-      - name: Creamos el Directorio para stack con proxy inverso (Traefik - https://doc.traefik.io/)
+      - name: Creamos el Directorio para stacks basicos (Traefik - https://doc.traefik.io/)
         file:
           path: /docker_stacks/basicos/
           state: directory
-
-      - name: Copiar stacks del proxy inverso (Traefik - https://doc.traefik.io/)
-        synchronize:
-          src: "docker_stacks_{{ env }}/traefik"
-          dest: "/docker_stacks/basicos/"
-          owner: no
-          group: no
-          rsync_opts:
-            - "--exclude=.git"
-
-      - name: Lanzamos docker-compose.yml del proxy inverso (Traefik - https://doc.traefik.io/)
-        docker_compose:
-          project_src: /docker_stacks/basicos/traefik/
-          recreate: "always"
-          # state: "absent"

@@ -6,7 +6,6 @@
 
     vars_files:
       - ../ansible_vars/vars.yaml
-      - ../ansible_vars/vault.yaml
 
     tasks:
       - name: Actualizar paquetes
@@ -39,7 +38,7 @@
           rsync_opts:
             - "--exclude=.git"
 
-      - name: Lanzamos docker-compose.yml del stack con MariaDB
-        docker_compose:
-          project_src: /docker_stacks/sgbd/mariadb/
-          recreate: "always"
+      # - name: Lanzamos docker-compose.yml del stack con MariaDB
+      #   docker_compose:
+      #     project_src: /docker_stacks/sgbd/mariadb/
+      #     recreate: "always"

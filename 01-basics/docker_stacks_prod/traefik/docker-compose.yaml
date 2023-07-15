@@ -2,21 +2,49 @@ version: '3'
 
 services:
   reverse-proxy:
+    container_name: reverse_proxy_traefik
     # The official v2 Traefik docker image
     image: traefik:v2.9
     # Enables the web UI and tells Traefik to listen to docker
-    command: 
+    command:
       # web UI and tells Traefik
       - "--api.insecure=true"
+      - "--log.level=DEBUG"
+      - "--log.filePath=/var/log/traefik.log"
       # Enable docker provider
       - "--providers.docker=true"
       # - "--providers.docker.exposedByDefault=false"
       # - "--providers.docker.defaultRule=Host(`{{ trimPrefix `/` .Name }}.docker.localhost`)"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-
+      # Dynamic conf
+      - "--providers.file.filename=/opt/traefik/dynamic.yml"
+      # http -> https
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      # https resolver
+      # - "--certificatesresolvers.le.acme.tlschallenge=true"
+      # - "--certificatesresolvers.le.acme.httpchallenge=true"
+      # - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=ovh"
+      - "--certificatesresolvers.myresolver.acme.email=paco@vzenix.es"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    secrets:
+      - "ovh_endpoint"
+      - "ovh_application_key"
+      - "ovh_application_secret"
+      - "ovh_consumer_key"
+    environment:
+      - "OVH_ENDPOINT_FILE=/run/secrets/ovh_endpoint"
+      - "OVH_APPLICATION_KEY_FILE=/run/secrets/ovh_application_key"
+      - "OVH_APPLICATION_SECRET_FILE=/run/secrets/ovh_application_secret"
+      - "OVH_CONSUMER_KEY_FILE=/run/secrets/ovh_consumer_key"
+    labels:
+      - "traefik.enable=true"
     restart: always
     networks:
+      - local_proxy
       - proxy
       - sgbd_mariadb
       - www_websites
@@ -29,7 +57,13 @@ services:
       - "8080:8080"
     volumes:
       # So that Traefik can listen to the Docker events
-      - /var/run/docker.sock:/var/run/docker.sock
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      # Certificados emitidos para el https
+      - "/docker_data/traefik/letsencrypt:/letsencrypt"
+      # Dynamic configuration
+      - "./dynamic.yml:/opt/traefik/dynamic.yml:ro"
+      # Logs
+      - "/docker_data/logs/traefik:/var/log"
 
 #  whoami:
 #    # A container that exposes an API to show its IP address
@@ -39,10 +73,25 @@ services:
 #    labels:
 #      - "traefik.http.routers.whoami.rule=Host(`whoami.vzenix.es`)"
 
+secrets:
+  ovh_endpoint:
+    file: "/docker_secrets/ovh_endpoint"
+  ovh_application_key:
+    file: "/docker_secrets/ovh_application_key"
+  ovh_application_secret:
+    file: "/docker_secrets/ovh_application_secret"
+  ovh_consumer_key:
+    file: "/docker_secrets/ovh_consumer_key"
+
 networks:
+  local_proxy:
+    name: local_proxy
   proxy:
     name: proxy
+    external: true
   sgbd_mariadb:
     name: sgbd_mariadb
+    external: true
   www_websites:
     name: www_websites
+    external: true

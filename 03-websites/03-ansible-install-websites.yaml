@@ -42,10 +42,22 @@
           clone: yes
           update: yes
 
-      - name: Lanzamos docker-compose.yml con los portales
-        docker_compose:
-          project_src: /docker_stacks/www/websites/
-          recreate: "always"
+      - name: Creamos directorio para redirecciones al dominio principal (https://vzenix.es)
+        file:
+          path: "/docker_data/www/redirect_vzenix_es"
+          state: directory
 
-      - name: Instalamos portal web (https://vzenix.es)
-        command: docker exec -it -w $PWD www_vzenix_es php /var/www/html/composer.phar install --working-dir "/var/www/html"
+      - name: Creamos .htaccess para redirecciones al dominio principal (https://vzenix.es)
+        copy:
+          dest: "/docker_data/www/redirect_vzenix_es/.htaccess"
+          content: |
+            RewriteEngine On
+            RewriteRule ^(.*)$ http://vzenix.es/$1 [R=301]
+
+      # - name: Lanzamos docker-compose.yml con los portales
+      #   docker_compose:
+      #     project_src: /docker_stacks/www/websites/
+      #     recreate: "always"
+
+      # - name: Instalamos portal web (https://vzenix.es)
+      #   command: docker exec -it -w $PWD www_vzenix_es php /var/www/html/composer.phar install --working-dir "/var/www/html"

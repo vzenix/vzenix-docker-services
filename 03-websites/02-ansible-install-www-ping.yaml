@@ -17,15 +17,25 @@
           rsync_opts:
             - "--exclude=.git"
 
+      - name: Verfiicamos que existe directorio para almacenar los datos de los portales
+        file:
+          path: /docker_data/www/
+          state: directory
+
+      - name: Creamos el Directorio para aplicacion (https://ping.vzenix.es)
+        file:
+          path: /docker_data/www/ping_vzenix_es/
+          state: directory
+
       - name: Crear index.html (https://ping.vzenix.es)
         copy:
           dest: "/docker_data/www/ping_vzenix_es/index.html"
           content: |
             <p>
-              P&aacute;gina de ejemplo para pruebas
+              P&aacute;gina (https://ping.vzenix.es)
             </p>
 
-      - name: Lanzamos docker-compose.yml (https://ping.vzenix.es)
-        docker_compose:
-          project_src: /docker_stacks/www/ping/
-          recreate: "always"
+      # - name: Lanzamos docker-compose.yml (https://ping.vzenix.es)
+      #   docker_compose:
+      #     project_src: /docker_stacks/www/ping/
+      #     recreate: "always"

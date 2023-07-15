@@ -2,6 +2,8 @@
 
 Entorno para servicios propios construidos en contenedores docker
 
+* **Nota:** las sentencias docker-compose up están comentadas en los playbook de ansible, descoméntalas si no deseas lanzar estas sentencias manualmente
+
 # Traducciones
 
 * [English](https://github.com/vzenix/vzenix-docker-services/blob/main/README.md)
@@ -29,7 +31,9 @@ Instalación base del servidor, el puerto 8080 se securiza en el cortafuegos, mo
 ansible all --ask-pass -m ping --limit=</ansiblle/hosts#nombre_host>
 
 # Lanzar playbook (--verbose más información)
-ansible-playbook 02-sgbd/ansible-instalacion-servidor.yaml --limit=</ansiblle/hosts#nombre_host> --ask-pass
+ansible-playbook 01-basics/01-ansible-server-install.yaml --limit=</ansible/hosts#nombre_host> --ask-pass
+ansible-playbook 01-basics/02-ansible-docker-network.yaml --limit=</ansible/hosts#nombre_host> --ask-pass
+ansible-playbook 01-basics/03-ansible-proxy.yaml --limit=</ansible/hosts#nombre_host> --ask-pass
 ```
 
 ## 02-sgbd
@@ -38,9 +42,11 @@ Instalación de los SGBD usados
 
 El puerto 3306 se securiza en el cortafuegos, modificar docker-compose.yaml de traefik para no exponer esto en caso de ser un servidor compeltamente público
 
+Recuerda establecer la contraseña de root para mariadb en ansible_vars/vars.yaml
+
 ```
 # Ejemplo de comando para lanzar el playbook
-ansible-playbook 02-sgbd/ansible-instalacion-sgbd.yaml --limit=</ansiblle/hosts#nombre_host> --ask-pass --ask-vault-pass
+ansible-playbook 02-sgbd/01-ansible-sgbd-mariadb.yaml --limit=</ansiblle/hosts#nombre_host> --ask-pass
 ```
 
 ## 03-websites
@@ -71,7 +77,9 @@ Instala o actualiza los portales webs
 
 ```
 # Ejemplo de comando para lanzar el playbook
-ansible-playbook 03-websites/03-ansible-instalacion-websites.yaml --limit=</ansiblle/hosts#nombre_host> --ask-pass
+ansible-playbook 03-websites/01-ansible-install-www-base.yaml --limit=</ansiblle/hosts#nombre_host> --ask-pass
+ansible-playbook 03-websites/02-ansible-install-www-ping.yaml --limit=</ansiblle/hosts#nombre_host> --ask-pass
+ansible-playbook 03-websites/03-ansible-install-websites.yaml --limit=</ansiblle/hosts#nombre_host> --ask-pass
 ```
 
 # Licencia

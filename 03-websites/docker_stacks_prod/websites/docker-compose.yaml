@@ -1,7 +1,7 @@
 services:
 
   www_vzenix_es:
-    image: www_portales_php
+    image: vzenix_es_apache_8_1_20230714
     container_name: www_vzenix_es
     restart: always
     networks:
@@ -17,9 +17,36 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.www_vzenix_es.rule=Host(`vzenix.es`)"
-      - "traefik.http.routers.www_vzenix_es.rule=Host(`www.vzenix.es`)"
-      - "traefik.http.routers.www_vzenix_es.entrypoints=websecure"
+      - "traefik.http.routers.www_vzenix_es.entrypoints=web,websecure"
       - "traefik.http.routers.www_vzenix_es.tls=true"
+      - "traefik.http.routers.www_vzenix_es.tls.certresolver=myresolver"
+      # Redireccion http -> https
+      - "traefik.http.middlewares.www_vzenix_es.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.www_vzenix_es.redirectscheme.permanent=true"
+
+  redirect_vzenix_es:
+    image: vzenix_es_apache_8_1_20230714
+    container_name: redirect_vzenix_es
+    restart: always
+    networks:
+      - www_websites
+      - sgbd_mariadb
+    environment:
+      - APP_ENV=prod
+    volumes:
+      - /docker_data/www/redirect_vzenix_es:/var/www/html  # Ficheros back de la aplicacion
+      - /docker_data/apache/redirect_vzenix_es/conf:/etc/apache2/sites-enabled   # Ficheros de configuracion del apache
+      - /docker_data/logs/redirect_vzenix_es/apache2:/var/log/apache2     # Ficheros de log
+      - /etc/localtime:/etc/localtime:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.redirect_vzenix_es.rule=Host(`www.vzenix.es`) || Host(`vzenix.com`) || Host(`www.vzenix.com`)"
+      - "traefik.http.routers.redirect_vzenix_es.entrypoints=web,websecure"
+      - "traefik.http.routers.redirect_vzenix_es.tls=true"
+      - "traefik.http.routers.redirect_vzenix_es.tls.certresolver=myresolver"
+      # Redireccion http -> https
+      - "traefik.http.middlewares.redirect_vzenix_es.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirect_vzenix_es.redirectscheme.permanent=true"
 
 networks:
   sgbd_mariadb:
