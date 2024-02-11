@@ -20,3 +20,10 @@
         community.docker.docker_network:
           name: www_websites
 
+      - name: Crearmos red "duplicati"
+        community.docker.docker_network:
+          name: duplicati
+
+      - name: Crearmos red "gitea"
+        community.docker.docker_network:
+          name: gitea
