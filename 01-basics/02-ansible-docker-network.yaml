@@ -27,3 +27,7 @@
       - name: Crearmos red "gitea"
         community.docker.docker_network:
           name: gitea
+
+      - name: Crearmos red "sso_net"
+        community.docker.docker_network:
+          name: sso_net
